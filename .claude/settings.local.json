@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cd \"C:/Users/jaemi/Desktop/example/앱/practice2/backend\" && node prisma/seed.js 2>&1)",
+      "Bash(cd \"C:/Users/jaemi/Desktop/example/앱/practice2/frontend\" && npm install 2>&1)"
+    ]
+  }
+}

@@ -1,0 +1,94 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           Int       @id @default(autoincrement())
+  email        String    @unique
+  password     String
+  nickname     String    @unique
+  avatar       String?
+  location     String    @default("미설정")
+  mannerScore  Float     @default(36.5)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  products        Product[]
+  sentMessages    Message[]  @relation("SentMessages")
+  chatRooms       ChatRoom[] @relation("ChatRoomBuyer")
+  reviews         Review[]   @relation("ReviewReceiver")
+  writtenReviews  Review[]   @relation("ReviewWriter")
+  likes           Like[]
+}
+
+model Product {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String   @default("")
+  price       Int
+  category    String
+  status      String   @default("SELLING")
+  location    String   @default("미설정")
+  images      String   @default("[]")
+  viewCount   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  seller    User       @relation(fields: [sellerId], references: [id])
+  sellerId  Int
+  chatRooms ChatRoom[]
+  likes     Like[]
+}
+
+model ChatRoom {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+
+  product   Product  @relation(fields: [productId], references: [id])
+  productId Int
+  buyer     User     @relation("ChatRoomBuyer", fields: [buyerId], references: [id])
+  buyerId   Int
+  messages  Message[]
+
+  @@unique([productId, buyerId])
+}
+
+model Message {
+  id         Int      @id @default(autoincrement())
+  content    String
+  createdAt  DateTime @default(now())
+
+  chatRoom   ChatRoom @relation(fields: [chatRoomId], references: [id])
+  chatRoomId Int
+  sender     User     @relation("SentMessages", fields: [senderId], references: [id])
+  senderId   Int
+}
+
+model Review {
+  id         Int      @id @default(autoincrement())
+  score      Float
+  content    String
+  createdAt  DateTime @default(now())
+
+  receiver   User @relation("ReviewReceiver", fields: [receiverId], references: [id])
+  receiverId Int
+  writer     User @relation("ReviewWriter", fields: [writerId], references: [id])
+  writerId   Int
+}
+
+model Like {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+
+  user      User    @relation(fields: [userId], references: [id])
+  userId    Int
+  product   Product @relation(fields: [productId], references: [id])
+  productId Int
+
+  @@unique([userId, productId])
+}

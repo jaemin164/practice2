@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: karrot_db
+    environment:
+      POSTGRES_USER: karrot
+      POSTGRES_PASSWORD: karrot1234
+      POSTGRES_DB: karrot_market
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  backend:
+    build: ./backend
+    container_name: karrot_backend
+    depends_on:
+      - postgres
+    environment:
+      DATABASE_URL: postgresql://karrot:karrot1234@postgres:5432/karrot_market
+      JWT_SECRET: your_jwt_secret_here
+      PORT: 4000
+    ports:
+      - '4000:4000'
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+      - ./backend/uploads:/app/uploads
+
+  frontend:
+    build: ./frontend
+    container_name: karrot_frontend
+    depends_on:
+      - backend
+    ports:
+      - '3000:3000'
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+
+volumes:
+  postgres_data:
